@@ -1,4 +1,24 @@
+import { Outlet, Link, useLoaderData,Form, redirect } from "react-router-dom";
+
+//importamos la funcion getContacts de nuestro archivo js contacts
+import { getContacts, createContact } from "../contacts";
+
+//creamos nuestra accion y llamamos a createcontact
+export async function action() {
+    const contact = await createContact();
+    return redirect(`/contacts/${contact.id}/edit`);
+  }
+  
+
+//exportamos un loader
+export async function loader(){
+    const contacts = await getContacts();
+  return { contacts };
+}
+
 export default function Root() {
+    //cargamos los contactos
+    const {contacts} = useLoaderData();
     return (
       <>
         <div id="sidebar">
@@ -22,22 +42,40 @@ export default function Root() {
                 aria-live="polite"
               ></div>
             </form>
-            <form method="post">
-              <button type="submit">Nuevo</button>
-            </form>
+            {
+            }
+            <Form method="post">
+                <button type="submit">Nuevo</button>
+            </Form>
           </div>
           <nav>
-            <ul>
-              <li>
-                <a href={`/contacts/1`}>Linus Torvalds</a>
-              </li>
-              <li>
-                <a href={`/contacts/2`}>Ari Lemmke</a>
-              </li>
-            </ul>
+            {contacts.length ? (
+                <ul>
+                {contacts.map((contact) => (
+                    <li key={contact.id}>
+                    <Link to={`contacts/${contact.id}`}>
+                        {contact.first || contact.last ? (
+                        <>
+                            {contact.first} {contact.last}
+                        </>
+                        ) : (
+                        <i>Sin nombre</i>
+                        )}{" "}
+                        {contact.favorite && <span>★</span>}
+                    </Link>
+                    </li>
+                ))}
+                </ul>
+            ) : (
+                <p>
+                <i>Sin contactos</i>
+                </p>
+            )}
           </nav>
         </div>
-        <div id="detail"></div>
+        <div id="detail">
+            <Outlet />
+        </div>
       </>
     );
   }
